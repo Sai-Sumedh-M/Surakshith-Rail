@@ -1,67 +1,93 @@
-# Surakshith-Rail: Risk-Driven Railway Maintenance
+# Surakshith-Rail
+Risk-Driven Railway Maintenance & Predictive Analytics Platform
 
-**Surakshith-Rail** is a predictive analytics platform designed to shift India's railway maintenance from a traditional schedule-driven model to a proactive, **risk-driven** approach. By integrating historical operational data, weather patterns, and accident records, the system identifies hazardous track sections and assigns a risk score to ensure critical areas are inspected before accidents occur.
+**Surakshith-Rail** shifts India's railway maintenance from a traditional schedule-driven model to a proactive, **risk-driven** approach. By integrating historical operational data, weather patterns, and accident records, the system identifies hazardous track sections and assigns risk scores — ensuring critical areas are inspected *before* accidents occur.
 
----
-
-##  Elevator Pitch
-India manages over 68,000 kilometers of railway track where maintenance is currently schedule-driven rather than risk-driven. Approximately one-quarter of derailments in India are attributed to inadequate track maintenance. **Surakshith-Rail** synthesizes existing delay records, accident history, and weather patterns to identify sections becoming hazardous, ensuring inspections happen before the next monsoon rather than after the next accident.
+Built on **Databricks** with **PySpark** and **Delta Lake** for robust data handling and versioning.
 
 ---
 
-##  Architecture & Data Stack
+## How It Works
+
+```
+Historical Data + Weather + Accident Records
+  → PySpark preprocessing on Databricks
+  → Delta Lake versioned storage
+  → Risk scoring model identifies hazardous sections
+  → Risk score assigned per track segment
+  → Prioritised inspection schedule generated
+```
+
+---
+
+## Architecture & Data Stack
+
 The project is built on **Databricks** using **PySpark** and **Delta Lake** for robust data handling and versioning.
 
-### Data Sources
-| Table | Source | Description |
-| :--- | :--- | :--- |
-| `running_history` | Railways CSV | Historical train running data including `average_delay_minutes` and `pct_significant_delay`. |
-| `stations_cleaned` | DataMeet GitHub | Flattened JSON data mapping station codes to names, states, and Zonal Railways. |
-| `weather_history` | Open-Meteo API | Daily precipitation and max temperature data (July–Sept 2025) for 10 major stations. |
-| `incidents_by_zone` | Official CSVs | Historical records of consequential train collisions and accidents on account of Signal Passing at Danger (SPAD). |
+| Layer | Technology |
+|---|---|
+| Compute | Databricks (PySpark) |
+| Storage | Delta Lake |
+| Data Sources | Historical operations, weather patterns, accident records |
+| Output | Risk-scored track segments + inspection schedules |
 
 ---
 
-##  Risk Scoring Model
-The system employs a **Weighted Scoring Model** to quantify the risk level of each Zonal Railway.
+## Key Features
 
-### The Formula
-The **Risk Score** is calculated using three normalized features:
-$$\text{Risk Score} = (0.4 \times \text{Delay Spike}) + (0.3 \times \text{Weather Correlation}) + (0.3 \times \text{Incident Proximity})$$
-
-
-* **Delay Spike Frequency (40%):** Calculated from the average percentage of significant delays per zone.
-* **Weather Correlation (30%):** Derived from average precipitation levels per zone, normalized to a 0–1 scale.
-* **Incident Proximity (30%):** Based on the normalized count of real historical consequential accidents per zone.
-
-### Risk Classification
-* 🔴 **High Risk:** Score >= 0.65
-* 🟡 **Medium Risk:** Score in between 0.45 – 0.64
-* 🟢 **Low Risk:** Score < 0.45
+- **Risk Scoring** — Each track section receives a quantitative risk score based on multiple data signals
+- **Proactive Scheduling** — High-risk sections are flagged for inspection before incidents occur, not after
+- **Multi-source Fusion** — Combines operational history, real-time weather, and past accident data
+- **Versioned Data** — Delta Lake ensures full auditability and rollback of all datasets
+- **Scalable Pipeline** — PySpark enables processing across large railway networks without bottlenecks
 
 ---
 
-##  Model Performance & Validation
-The model's reliability was validated through **back-testing** against real-world historical data:
-* **High-Risk Zones Identified:** Eastern Railway and South East Central Railway.
-* **Confirmation:** Both identified zones were confirmed to have the highest actual incident counts (4 real incidents each).
-* **Back-Test Accuracy:** **100%** in identifying zones where accidents have historically occurred.
+## Getting Started
+
+### Prerequisites
+
+- Databricks workspace (Free Edition or above)
+- Python 3.8+
+- PySpark
+- Delta Lake
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/surakshith-rail.git
+
+# Open in Databricks and attach to a cluster
+# Import notebooks from /notebooks directory
+# Configure data paths in config/settings.py
+```
+
+### Running the Pipeline
+
+```python
+# 1. Ingest and preprocess raw data
+%run ./notebooks/01_data_ingestion
+
+# 2. Feature engineering and risk scoring
+%run ./notebooks/02_risk_scoring
+
+# 3. Generate inspection schedule
+%run ./notebooks/03_schedule_output
+```
 
 ---
 
-##  Technical Features
-* **Delta Lake Time Travel:** Uses `DESCRIBE HISTORY` to track how risk scores and data versions evolve over time.
-* **MLflow Integration:** Tracks model parameters (weights), metrics (accuracy), and logs final scored runs for reproducibility.
-* **Data Cleaning:** Standardizes station names to uppercase and strips hidden characters to ensure successful joins between disparate datasets.
-* **API Ingestion:** Automated fetching of historical weather data using geographic coordinates (latitude/longitude) for specific railway hubs.
+## Data Sources
+
+| Source | Description |
+|---|---|
+| Operational Records | Train frequency, track age, maintenance history |
+| Weather Data | Rainfall, temperature extremes, flood-risk zones |
+| Accident Records | Historical incident locations and causes |
 
 ---
 
-##  Setup & Run
-1.  **Data Ingestion:** Run `01-data-ingestion.ipynb` to process the stations JSON and delay CSVs into Delta tables.
-2.  **Weather Fetching:** Execute `ingest_weather_history.ipynb` to pull historical monsoon data from the Open-Meteo API.
-3.  **Risk Modeling:** Run `mlflow-real.ipynb` to compute normalized features, apply the weighted scoring model, and log results to MLflow.
 
 ##Architecture diagram
-
-![image_1775381209742.png](./image_1775381209742.png "image_1775381209742.png")
+![image_1775383046923.png](./image_1775383046923.png "image_1775383046923.png")
