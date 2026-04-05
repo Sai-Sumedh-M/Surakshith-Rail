@@ -61,3 +61,7 @@ The model's reliability was validated through **back-testing** against real-worl
 1.  **Data Ingestion:** Run `01-data-ingestion.ipynb` to process the stations JSON and delay CSVs into Delta tables.
 2.  **Weather Fetching:** Execute `ingest_weather_history.ipynb` to pull historical monsoon data from the Open-Meteo API.
 3.  **Risk Modeling:** Run `mlflow-real.ipynb` to compute normalized features, apply the weighted scoring model, and log results to MLflow.
+
+##Architecture diagram
+
+![image_1775381209742.png](./image_1775381209742.png "image_1775381209742.png")
